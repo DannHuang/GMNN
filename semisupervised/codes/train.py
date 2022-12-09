@@ -136,7 +136,7 @@ gnnq = GNNq(opt, adj)
 trainer_q = Trainer(opt, gnnq)
 # Maintain another GNN-q for comparison
 if opt['compare'] == 1:
-    gnnq_concat = GNNq_feature(opt, adj)
+    gnnq_concat = GNNq(opt, adj)
     trainer_q_concat = Trainer(opt, gnnq_concat)
 
 gnnp = GNNp(opt, adj)
@@ -156,7 +156,11 @@ def update_p_data():
     # update inputs and target (GNN-q's output) to GNN-p
     if opt['compare'] == 1:
         preds = trainer_q.predict(inputs_q, opt['tau'])
+<<<<<<< HEAD
         preds_concat, hidden_q = trainer_q_concat.predict_o_hidden(inputs_q, opt['tau'])
+=======
+        preds_concat = trainer_q_concat.predict(inputs_q, opt['tau'])
+>>>>>>> c7065d2 (bug-fixed in attibute-concat branch)
         if opt['draw'] == 'exp':
             inputs_p.copy_(preds)
             target_p.copy_(preds)
@@ -192,8 +196,12 @@ def update_p_data():
             temp = torch.zeros(idx_train.size(0), inputs_p_concat.size(1)).type_as(target_q)
             temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
             inputs_p_concat[idx_train] = temp
+<<<<<<< HEAD
         inputs_p_concat.copy_(torch.cat((inputs_p, hidden_q), 1))
 >>>>>>> 75fa17c (bug fixed for hidden-concat)
+=======
+        inputs_p_concat.copy_(torch.cat((inputs_p, inputs_q), 1))
+>>>>>>> c7065d2 (bug-fixed in attibute-concat branch)
     else:
         preds = trainer_q.predict(inputs_q, opt['tau'])
         if opt['draw'] == 'exp':
@@ -369,11 +377,15 @@ def train_q(epoches):
             _, preds, accuracy_test = trainer_q.evaluate(inputs_q, target, idx_test)
             results[0] += [(accuracy_dev, accuracy_test)]
             # if opt['IR'] == 1: loss = trainer_q_concat.update_soft_IR(inputs_q, target_q_concat, idx_all, probs_q_concat)
+<<<<<<< HEAD
             loss = trainer_q_concat.update_soft_hidden(inputs_q, target_q_concat, idx_all)
 <<<<<<< HEAD
             _, preds, accuracy_dev = trainer_q_concat.evaluate_o_hidden(inputs_q, target, idx_dev)
             _, preds, accuracy_test = trainer_q_concat.evaluate_o_hidden(inputs_q, target, idx_test)
 =======
+=======
+            loss = trainer_q_concat.update_soft(inputs_q, target_q_concat, idx_all)
+>>>>>>> c7065d2 (bug-fixed in attibute-concat branch)
             _, preds, accuracy_dev = trainer_q.evaluate(inputs_q, target, idx_dev)
             _, preds, accuracy_test = trainer_q.evaluate(inputs_q, target, idx_test)
 >>>>>>> 75fa17c (bug fixed for hidden-concat)

@@ -138,9 +138,17 @@ class GNNp_singelGCN(nn.Module):
     def reset(self):
         self.m1.reset_parameters()
 
+<<<<<<< HEAD
     def forward(self, x, h):
         x = F.relu(self.l1(x))
         xh = torch.cat((x, h), 1)
         xh = F.dropout(xh, self.opt['input_dropout'], training=self.training)
         xh = self.m1(xh)
         return xh
+=======
+    def forward(self, x):
+        # x = torch.cat((x, h), 1)
+        x = F.dropout(x, self.opt['input_dropout'], training=self.training)
+        x = self.m1(x)
+        return x
+>>>>>>> 75fa17c (bug fixed for hidden-concat)

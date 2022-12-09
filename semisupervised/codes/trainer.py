@@ -152,6 +152,7 @@ class Trainer(object):
         loss.backward()
         self.optimizer.step()
         return loss.item()
+<<<<<<< HEAD
     
     def evaluate_w_hidden(self, inputs, hidden, target, idx):
         if self.opt['cuda']:
@@ -169,6 +170,8 @@ class Trainer(object):
         accuracy = correct.sum() / idx.size(0)
 
         return loss.item(), preds, accuracy.item()
+=======
+>>>>>>> 75fa17c (bug fixed for hidden-concat)
     
     def evaluate(self, inputs, target, idx):
         if self.opt['cuda']:

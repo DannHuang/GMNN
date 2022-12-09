@@ -179,10 +179,17 @@ def update_p_data():
             inputs_p[idx_train] = temp
             target_p[idx_train] = temp
             target_p_concat[idx_train] = temp
+<<<<<<< HEAD
             # temp = torch.zeros(idx_train.size(0), inputs_p_concat.size(1)).type_as(target_q)
             # temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
             # inputs_p_concat[idx_train] = temp
         hidden.copy_(hidden_q)
+=======
+            temp = torch.zeros(idx_train.size(0), inputs_p_concat.size(1)).type_as(target_q)
+            temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
+            inputs_p_concat[idx_train] = temp
+        inputs_p_concat.copy_(torch.cat((inputs_p, hidden_q), 1))
+>>>>>>> 75fa17c (bug fixed for hidden-concat)
     else:
         preds = trainer_q.predict(inputs_q, opt['tau'])
         if opt['draw'] == 'exp':
@@ -359,8 +366,13 @@ def train_q(epoches):
             results[0] += [(accuracy_dev, accuracy_test)]
             # if opt['IR'] == 1: loss = trainer_q_concat.update_soft_IR(inputs_q, target_q_concat, idx_all, probs_q_concat)
             loss = trainer_q_concat.update_soft_hidden(inputs_q, target_q_concat, idx_all)
+<<<<<<< HEAD
             _, preds, accuracy_dev = trainer_q_concat.evaluate_o_hidden(inputs_q, target, idx_dev)
             _, preds, accuracy_test = trainer_q_concat.evaluate_o_hidden(inputs_q, target, idx_test)
+=======
+            _, preds, accuracy_dev = trainer_q.evaluate(inputs_q, target, idx_dev)
+            _, preds, accuracy_test = trainer_q.evaluate(inputs_q, target, idx_test)
+>>>>>>> 75fa17c (bug fixed for hidden-concat)
             results[1] += [(accuracy_dev, accuracy_test)]
         else:
             # if opt['IR'] == 1: loss = trainer_q.update_soft_IR(inputs_q, target_q, idx_all, probs_q)

@@ -14,12 +14,16 @@ opt['optimizer'] = 'adam'
 opt['lr'] = 0.01
 opt['decay'] = 5e-4
 opt['self_link_weight'] = 1.0
-opt['pre_epoch'] = 200
-opt['epoch'] = 100
-opt['iter'] = 1
+opt['pre_epoch'] = 100
+opt['epoch'] = 10
+opt['iter'] = 5
 opt['use_gold'] = 1
 opt['draw'] = 'smp'
 opt['tau'] = 0.1
+opt['concat'] = 1
+opt['compare'] = 1 * opt['concat']
+opt['IR'] = 0
+opt['MC_smp'] = 50
 
 def generate_command(opt):
     cmd = 'python3 train.py'
@@ -31,7 +35,7 @@ def run(opt):
     opt_ = copy.deepcopy(opt)
     os.system(generate_command(opt_))
 
-for k in range(100):
+for k in range(10):
     seed = k + 1
     opt['seed'] = seed
     run(opt)

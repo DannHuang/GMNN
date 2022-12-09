@@ -22,7 +22,7 @@ opt['draw'] = 'smp'
 opt['tau'] = 0.1
 opt['concat'] = 1
 opt['compare'] = 1 * opt['concat']
-opt['IR'] = 0
+opt['IR'] = 1
 opt['MC_smp'] = 50
 
 def generate_command(opt):

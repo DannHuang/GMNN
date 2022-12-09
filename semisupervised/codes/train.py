@@ -265,6 +265,24 @@ def update_q_data():
         target_q[idx_train] = temp
         if opt['compare'] == 1: target_q_concat[idx_train] = temp
 
+def update_q_data_by_gradient():
+    if opt['compare'] == 1:
+        preds_concat = trainer_p_concat.predict_by_gradient_w_hidden(inputs_p, hidden, target_p_concat, idx_all)
+        preds = trainer_p.predict_by_gradient(inputs_p, target_p, idx_all)
+        target_q_concat.copy_(preds_concat)
+        target_q.copy_(preds)
+    else:
+        if opt['concat'] == 1:
+            preds = trainer_p_concat.predict_by_gradient_w_hidden(inputs_p, hidden, target_p_concat, idx_all)
+        else:
+            preds = trainer_p.predict(inputs_p, target_p, idx_all)
+        target_q.copy_(preds)
+    if opt['use_gold'] == 1:
+        temp = torch.zeros(idx_train.size(0), target_q.size(1)).type_as(target_q)
+        temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
+        target_q[idx_train] = temp
+        if opt['compare'] == 1: target_q_concat[idx_train] = temp
+
 def pre_train(epoches):
     best = 0.0
     init_q_data()
@@ -317,7 +335,8 @@ def train_p(epoches):
                 results += [(accuracy_dev, accuracy_test)]
     return results
 
-# def train_p_concat(epoches):
+'''
+def train_p_concat(epoches):
     update_p_concat_data()
     results = []
     for epoch in range(epoches):
@@ -326,6 +345,7 @@ def train_p(epoches):
         _, preds, accuracy_test = trainer_p_concat.evaluate(inputs_p_concat, target, idx_test)
         results += [(accuracy_dev, accuracy_test)]
     return results
+'''
 
 def train_q(epoches):
     update_q_data()

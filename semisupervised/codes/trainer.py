@@ -215,6 +215,57 @@ class Trainer(object):
 
         return logits
     
+    def predict_by_gradient_w_hidden(self, inputs, hidden, target, idx):
+        psd_label = torch.zeros_like(inputs)
+        psd_label.copy_(inputs)
+        if self.opt['cuda']:
+            psd_label = psd_label.cuda()
+            hidden = hidden.cuda()
+            target = target.cuda()
+            idx = idx.cuda()
+        for p in self.parameters: p.requires_grad = False
+        psd_label.requires_grad = True
+        self.model.train()
+        self.optimizer.zero_grad()
+        logits = self.model(psd_label, hidden)
+        logits = torch.log_softmax(logits, dim=-1)
+        loss = -torch.mean(torch.sum(target[idx] * logits[idx], dim=-1))
+
+        loss.backward()
+        self.optimizer.step()
+
+        # labels = torch.softmax(psd_label, dim=-1).detach()
+        labels = psd_label.detach()
+
+        for p in self.parameters: p.requires_grad = True
+
+        return labels
+
+    def predict_by_gradient(self, inputs, target, idx):
+        psd_label = torch.zeros_like(inputs)
+        psd_label.copy_(inputs)
+        if self.opt['cuda']:
+            psd_label = psd_label.cuda()
+            target = target.cuda()
+            idx = idx.cuda()
+        for p in self.parameters: p.requires_grad = False
+        psd_label.requires_grad = True
+        self.model.train()
+        self.optimizer.zero_grad()
+        logits = self.model(psd_label)
+        logits = torch.log_softmax(logits, dim=-1)
+        loss = -torch.mean(torch.sum(target[idx] * logits[idx], dim=-1))
+
+        loss.backward()
+        self.optimizer.step()
+
+        # labels = torch.softmax(psd_label, dim=-1).detach()
+        labels = psd_label.detach()
+        
+        for p in self.parameters: p.requires_grad = True
+
+        return labels         
+
     def predict_w_hidden(self, inputs, hidden, tau=1):
         # output distribution
         if self.opt['cuda']:

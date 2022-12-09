@@ -16,12 +16,17 @@ opt['decay'] = 5e-4
 opt['self_link_weight'] = 1.0
 opt['pre_epoch'] = 100
 opt['epoch'] = 10   # Gradient descent iter
+<<<<<<< HEAD
 opt['iter'] = 5    # fixed-point iter
+=======
+opt['iter'] = 15    # fixed-point iter
+>>>>>>> b1d8e26 (run experiment)
 opt['use_gold'] = 1
 opt['draw'] = 'smp'
 opt['tau'] = 0.1
 opt['concat'] = 1
 opt['compare'] = 1 * opt['concat']
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 opt['IR'] = 0
@@ -32,6 +37,10 @@ opt['MC_smp'] = 50
 opt['IR'] = 1
 opt['MC_smp'] = 10
 >>>>>>> da42629 (IR test)
+=======
+opt['IR'] = 0
+opt['MC_smp'] = 50
+>>>>>>> b1d8e26 (run experiment)
 
 def generate_command(opt):
     cmd = 'python3 train.py'

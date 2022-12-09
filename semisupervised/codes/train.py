@@ -355,7 +355,7 @@ def get_accuracy(results):
 base_results, q_results, p_results, p_concat_results, q_concat_results = [], [], [], [], []
 base_results += pre_train(opt['pre_epoch'])
 for k in range(opt['iter']):
-    print(f'\tFixed-point Iter {k}:')
+    print(f'\tFixed-point Iteration {k}:')
     if opt['compare'] == 1:
         for it in range(opt['MC_smp']):
             results_p = train_p(opt['epoch'])

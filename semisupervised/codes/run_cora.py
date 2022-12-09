@@ -38,5 +38,5 @@ def run(opt):
 for k in range(1):
     seed = k + 1
     opt['seed'] = seed
-    print(f'Train{k}:'+'-'*17)
+    print(f'Experiment{k}:'+'-'*17)
     run(opt)

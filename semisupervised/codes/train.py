@@ -102,8 +102,12 @@ if opt['IR'] == 1:
     probs_q_concat = torch.zeros(opt['num_node'])
 # Feature concatenated to GNN-p input
 if opt['concat'] == 1:
+<<<<<<< HEAD
     # inputs_p_concat = torch.zeros(opt['num_node'], opt['num_class'] + opt['hidden_dim'])
     hidden = torch.zeros(opt['num_node'], opt['hidden_dim'])
+=======
+    inputs_p_concat = torch.zeros(opt['num_node'], opt['num_class'] + opt['num_feature'])
+>>>>>>> ab411ab (branch test)
 if opt['compare'] == 1:
     # Maintain additional tensor for comparision
     target_q_concat = torch.zeros(opt['num_node'], opt['num_class'])

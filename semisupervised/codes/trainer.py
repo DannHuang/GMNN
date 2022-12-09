@@ -63,7 +63,6 @@ class Trainer(object):
             inputs = inputs.cuda()
             target = target.cuda()
             idx = idx.cuda()
-
         self.model.train()
         self.optimizer.zero_grad()
 
@@ -90,6 +89,23 @@ class Trainer(object):
         self.optimizer.zero_grad()
 
         logits = self.model(inputs)
+        logits = torch.log_softmax(logits, dim=-1)
+        loss = -torch.mean(torch.sum(target[idx] * logits[idx], dim=-1))
+
+        loss.backward()
+        self.optimizer.step()
+        return loss.item()
+
+    def update_soft_hidden(self, inputs, target, idx):
+        if self.opt['cuda']:
+            inputs = inputs.cuda()
+            target = target.cuda()
+            idx = idx.cuda()
+
+        self.model.train()
+        self.optimizer.zero_grad()
+
+        logits, _ = self.model(inputs)
         logits = torch.log_softmax(logits, dim=-1)
         loss = -torch.mean(torch.sum(target[idx] * logits[idx], dim=-1))
 
@@ -132,7 +148,6 @@ class Trainer(object):
             inputs = inputs.cuda()
 
         self.model.eval()
-
         logits, hidden = self.model(inputs)
         logits /= tau
         logits = torch.softmax(logits, dim=-1).detach()

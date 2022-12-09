@@ -28,6 +28,7 @@ class GNNq(nn.Module):
         self.m2.reset_parameters()
 
     def forward(self, x):
+        # print('GNN-q normal')
         x = F.dropout(x, self.opt['input_dropout'], training=self.training)
         x = self.m1(x)
         x = F.relu(x)
@@ -37,7 +38,7 @@ class GNNq(nn.Module):
 
 class GNNq_feature(nn.Module):
     def __init__(self, opt, adj):
-        super(GNNq, self).__init__()
+        super(GNNq_feature, self).__init__()
         self.opt = opt
         self.adj = adj
 
@@ -56,12 +57,13 @@ class GNNq_feature(nn.Module):
         self.m2.reset_parameters()
 
     def forward(self, x):
+        # print('GNNq_feature is called')
         x = F.dropout(x, self.opt['input_dropout'], training=self.training)
         x = self.m1(x)
         h = F.relu(x)
         x = F.dropout(h, self.opt['dropout'], training=self.training)
         x = self.m2(x)
-        return x, h
+        return x, h.detach()
 
 class GNNp(nn.Module):
     def __init__(self, opt, adj):
@@ -121,7 +123,7 @@ class GNNp_concat(nn.Module):
 
 class GNNp_singelGCN(nn.Module):
     def __init__(self, opt, adj):
-        super(GNNp_concat, self).__init__()
+        super(GNNp_singelGCN, self).__init__()
         self.opt = opt
         self.adj = adj
 
@@ -135,8 +137,8 @@ class GNNp_singelGCN(nn.Module):
     def reset(self):
         self.m1.reset_parameters()
 
-    def forward(self, x, h):
-        x = torch.cat((x, h), 1)
+    def forward(self, x):
+        # x = torch.cat((x, h), 1)
         x = F.dropout(x, self.opt['input_dropout'], training=self.training)
         x = self.m1(x)
         return x

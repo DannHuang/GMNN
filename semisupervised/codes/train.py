@@ -41,6 +41,7 @@ parser.add_argument('--cuda', type=bool, default=torch.cuda.is_available())
 parser.add_argument('--cpu', action='store_true', help='Ignore CUDA.')
 args = parser.parse_args()
 
+# # Random Seed
 torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 random.seed(args.seed)
@@ -51,6 +52,7 @@ elif args.cuda:
 
 opt = vars(args)
 
+# # Read-In Data
 net_file = opt['dataset'] + '/net.txt'
 label_file = opt['dataset'] + '/label.txt'
 feature_file = opt['dataset'] + '/feature.txt'
@@ -81,30 +83,31 @@ with open(test_file, 'r') as fi:
     idx_test = [vocab_node.stoi[line.strip()] for line in fi]
 idx_all = list(range(opt['num_node']))
 
+# # Global Tensor Init
 inputs = torch.Tensor(feature.one_hot)
 target = torch.LongTensor(label.itol)
-
+# Index Seperate
 idx_train = torch.LongTensor(idx_train)
 idx_dev = torch.LongTensor(idx_dev)
 idx_test = torch.LongTensor(idx_test)
 idx_all = torch.LongTensor(idx_all)
-
+# Input/Output of 2 GNNs
 inputs_q = torch.zeros(opt['num_node'], opt['num_feature'])
 target_q = torch.zeros(opt['num_node'], opt['num_class'])
 inputs_p = torch.zeros(opt['num_node'], opt['num_class'])
 target_p = torch.zeros(opt['num_node'], opt['num_class'])
-
+# Importance Ratio Adjustment
 if opt['IR'] == 1:
     probs_q = torch.zeros(opt['num_node'])
     probs_q_concat = torch.zeros(opt['num_node'])
-
+# Feature concatenated to GNN-p input
 if opt['concat'] == 1:
     inputs_p_concat = torch.zeros(opt['num_node'], opt['num_class'] + opt['hidden_dim'])
 if opt['compare'] == 1:
-    # from concat GNN-p
+    # Maintain additional tensor for comparision
     target_q_concat = torch.zeros(opt['num_node'], opt['num_class'])
     target_p_concat = torch.zeros(opt['num_node'], opt['num_class'])
-
+# Send to cuda if available
 if opt['cuda']:
     inputs = inputs.cuda()
     target = target.cuda()
@@ -122,14 +125,13 @@ if opt['cuda']:
     target_q_concat = target_q_concat.cuda() if opt['compare'] == 1 else None
     target_p_concat = target_p_concat.cuda() if opt['compare'] == 1 else None
 
-
-# GNNs
+# # Init GNNs
 gnnq = GNNq(opt, adj)
 trainer_q = Trainer(opt, gnnq)
-
+# Maintain another GNN-q for comparison
 if opt['compare'] == 1:
     gnnq_concat = GNNq_feature(opt, adj)
-    trainer_q_concat = Trainer(opt, gnnq)
+    trainer_q_concat = Trainer(opt, gnnq_concat)
 
 gnnp = GNNp(opt, adj)
 trainer_p = Trainer(opt, gnnp)
@@ -145,7 +147,7 @@ def init_q_data():
     target_q[idx_train] = temp
 
 def update_p_data():
-    # update inputs and target (q's prediction)
+    # update inputs and target (GNN-q's output) to GNN-p
     if opt['compare'] == 1:
         preds = trainer_q.predict(inputs_q, opt['tau'])
         preds_concat, hidden_q = trainer_q_concat.predict_hidden(inputs_q, opt['tau'])
@@ -169,7 +171,6 @@ def update_p_data():
             idx_lb_concat = torch.multinomial(preds_concat, 1).squeeze(1)
             if opt['IR'] == 1: probs_q_concat.copy_(preds_concat[(torch.arange(preds_concat.shape[0]), idx_lb_concat)])
             target_p_concat.zero_().scatter_(1, torch.unsqueeze(idx_lb_concat, 1), 1.0)
-        inputs_p_concat.copy_(torch.cat((inputs_p, hidden_q), 1))
         if opt['use_gold'] == 1:
             temp = torch.zeros(idx_train.size(0), target_q.size(1)).type_as(target_q)
             temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
@@ -179,6 +180,7 @@ def update_p_data():
             temp = torch.zeros(idx_train.size(0), inputs_p_concat.size(1)).type_as(target_q)
             temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
             inputs_p_concat[idx_train] = temp
+        inputs_p_concat.copy_(torch.cat((inputs_p, hidden_q), 1))
     else:
         preds = trainer_q.predict(inputs_q, opt['tau'])
         if opt['draw'] == 'exp':
@@ -331,7 +333,7 @@ def train_q(epoches):
             _, preds, accuracy_test = trainer_q.evaluate(inputs_q, target, idx_test)
             results[0] += [(accuracy_dev, accuracy_test)]
             # if opt['IR'] == 1: loss = trainer_q_concat.update_soft_IR(inputs_q, target_q_concat, idx_all, probs_q_concat)
-            loss = trainer_q_concat.update_soft(inputs_q, target_q_concat, idx_all)
+            loss = trainer_q_concat.update_soft_hidden(inputs_q, target_q_concat, idx_all)
             _, preds, accuracy_dev = trainer_q.evaluate(inputs_q, target, idx_dev)
             _, preds, accuracy_test = trainer_q.evaluate(inputs_q, target, idx_test)
             results[1] += [(accuracy_dev, accuracy_test)]

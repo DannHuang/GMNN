@@ -38,5 +38,9 @@ def run(opt):
 for k in range(10):
     seed = k + 1
     opt['seed'] = seed
+<<<<<<< HEAD
     print(f'Experiment{k+1}:'+'-'*17)
+=======
+    print(f'Experiment{k}:'+'-'*17)
+>>>>>>> 263f96e (logger-update)
     run(opt)

@@ -413,10 +413,14 @@ base_results += pre_train(opt['pre_epoch'])
 print(f'Pre-train accuracy: q={get_accuracy(base_results)*100:.1f}%')
 for k in range(opt['iter']):
 <<<<<<< HEAD
+<<<<<<< HEAD
     print(f'\tFixed-point Iteration {k+1}:')
 =======
     print(f'\tFixed-point Iteration {k}:')
 >>>>>>> 4032dda (bug fixed)
+=======
+    print(f'\tFixed-point Iteration {k+1}:')
+>>>>>>> 1c20b2d (logger update)
     if opt['compare'] == 1:
         for it in range(opt['MC_smp']):
             results_p = train_p(opt['epoch'])

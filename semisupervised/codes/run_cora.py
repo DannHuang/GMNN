@@ -23,9 +23,12 @@ opt['tau'] = 0.1
 opt['concat'] = 1
 opt['compare'] = 1 * opt['concat']
 <<<<<<< HEAD
+<<<<<<< HEAD
 opt['IR'] = 0
 opt['MC_smp'] = 50
 =======
+=======
+>>>>>>> 1c20b2d (logger update)
 opt['IR'] = 1
 opt['MC_smp'] = 10
 >>>>>>> da42629 (IR test)
@@ -44,8 +47,12 @@ for k in range(10):
     seed = k + 1
     opt['seed'] = seed
 <<<<<<< HEAD
+<<<<<<< HEAD
     print(f'Experiment{k+1}:'+'-'*17)
 =======
     print(f'Experiment{k}:'+'-'*17)
 >>>>>>> 263f96e (logger-update)
+=======
+    print(f'Experiment{k+1}:'+'-'*17)
+>>>>>>> 1c20b2d (logger update)
     run(opt)

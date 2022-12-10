@@ -102,7 +102,8 @@ if opt['IR'] == 1:
     probs_q_concat = torch.zeros(opt['num_node'])
 # Feature concatenated to GNN-p input
 if opt['concat'] == 1:
-    inputs_p_concat = torch.zeros(opt['num_node'], opt['num_class'] + opt['hidden_dim'])
+    # inputs_p_concat = torch.zeros(opt['num_node'], opt['num_class'] + opt['hidden_dim'])
+    hidden = torch.zeros(opt['num_node'], opt['hidden_dim'])
 if opt['compare'] == 1:
     # Maintain additional tensor for comparision
     target_q_concat = torch.zeros(opt['num_node'], opt['num_class'])
@@ -121,7 +122,8 @@ if opt['cuda']:
     target_q = target_q.cuda()
     inputs_p = inputs_p.cuda()
     target_p = target_p.cuda()
-    inputs_p_concat = inputs_p_concat.cuda() if opt['concat'] == 1 else None
+    # inputs_p_concat = inputs_p_concat.cuda() if opt['concat'] == 1 else None
+    hidden = hidden.cuda() if opt['concat'] == 1 else None
     target_q_concat = target_q_concat.cuda() if opt['compare'] == 1 else None
     target_p_concat = target_p_concat.cuda() if opt['compare'] == 1 else None
 
@@ -150,7 +152,7 @@ def update_p_data():
     # update inputs and target (GNN-q's output) to GNN-p
     if opt['compare'] == 1:
         preds = trainer_q.predict(inputs_q, opt['tau'])
-        preds_concat, hidden_q = trainer_q_concat.predict_hidden(inputs_q, opt['tau'])
+        preds_concat, hidden_q = trainer_q_concat.predict_o_hidden(inputs_q, opt['tau'])
         if opt['draw'] == 'exp':
             inputs_p.copy_(preds)
             target_p.copy_(preds)
@@ -177,10 +179,10 @@ def update_p_data():
             inputs_p[idx_train] = temp
             target_p[idx_train] = temp
             target_p_concat[idx_train] = temp
-            temp = torch.zeros(idx_train.size(0), inputs_p_concat.size(1)).type_as(target_q)
-            temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
-            inputs_p_concat[idx_train] = temp
-        inputs_p_concat.copy_(torch.cat((inputs_p, hidden_q), 1))
+            # temp = torch.zeros(idx_train.size(0), inputs_p_concat.size(1)).type_as(target_q)
+            # temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
+            # inputs_p_concat[idx_train] = temp
+        hidden.copy_(hidden_q)
     else:
         preds = trainer_q.predict(inputs_q, opt['tau'])
         if opt['draw'] == 'exp':
@@ -197,14 +199,14 @@ def update_p_data():
             inputs_p.zero_().scatter_(1, torch.unsqueeze(idx_lb, 1), 1.0)
             target_p.zero_().scatter_(1, torch.unsqueeze(idx_lb, 1), 1.0)
         if opt['concat'] == 1:
-            inputs_p_concat.copy_(torch.cat((inputs_p, inputs_q), 1))
+            # inputs_p_concat.copy_(torch.cat((inputs_p, inputs_q), 1))
             if opt['use_gold'] == 1:
                 temp = torch.zeros(idx_train.size(0), target_q.size(1)).type_as(target_q)
                 temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
                 target_p[idx_train] = temp
-                temp = torch.zeros(idx_train.size(0), inputs_p_concat.size(1)).type_as(target_q)
+                # temp = torch.zeros(idx_train.size(0), inputs_p_concat.size(1)).type_as(target_q)
                 temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
-                inputs_p_concat[idx_train] = temp
+                # inputs_p_concat[idx_train] = temp
         else:
             if opt['use_gold'] == 1:
                 temp = torch.zeros(idx_train.size(0), target_q.size(1)).type_as(target_q)
@@ -247,13 +249,13 @@ def update_p_concat_data():
 def update_q_data():
     # TODO: add Monte Carlo estimates, or MPE estimates of GNN-p
     if opt['compare'] == 1:
-        preds_concat = trainer_p_concat.predict(inputs_p_concat)
+        preds_concat = trainer_p_concat.predict_w_hidden(inputs_p, hidden)
         preds = trainer_p.predict(inputs_p)
         target_q_concat.copy_(preds_concat)
         target_q.copy_(preds)
     else:
         if opt['concat'] == 1:
-            preds = trainer_p_concat.predict(inputs_p_concat)
+            preds = trainer_p_concat.predict_w_hidden(inputs_p, hidden)
         else:
             preds = trainer_p.predict(inputs_p)
         target_q.copy_(preds)
@@ -287,32 +289,35 @@ def train_p(epoches):
     results = [[], []] if opt['compare'] == 1 else []
     for epoch in range(epoches):
         if opt['compare'] == 1:
-            if opt['IR'] == 1: loss = trainer_p_concat.update_soft_IR(inputs_p_concat, target_p_concat, idx_all, probs_q_concat, opt['tau'])
-            else: loss = trainer_p_concat.update_soft(inputs_p_concat, target_p_concat, idx_all)
-            _, preds, accuracy_dev = trainer_p_concat.evaluate(inputs_p_concat, target, idx_dev)
-            _, preds, accuracy_test = trainer_p_concat.evaluate(inputs_p_concat, target, idx_test)
+
+            if opt['IR'] == 1: loss = trainer_p_concat.update_soft_IR_w_hidden(inputs_p, hidden, target_p_concat, idx_all, probs_q_concat)
+            else: loss = trainer_p_concat.update_soft_w_hidden(inputs_p, hidden, target_p_concat, idx_all)
+            _, preds, accuracy_dev = trainer_p_concat.evaluate_w_hidden(inputs_p, hidden, target, idx_dev)
+            _, preds, accuracy_test = trainer_p_concat.evaluate_w_hidden(inputs_p, hidden, target, idx_test)
             results[1] += [(accuracy_dev, accuracy_test)]
-            if opt['IR'] == 1: loss = trainer_p.update_soft_IR(inputs_p, target_p, idx_all, probs_q, opt['tau'])
+
+            if opt['IR'] == 1: loss = trainer_p.update_soft_IR(inputs_p, target_p, idx_all, probs_q)
             else: loss = trainer_p.update_soft(inputs_p, target_p, idx_all)
             _, preds, accuracy_dev = trainer_p.evaluate(inputs_p, target, idx_dev)
             _, preds, accuracy_test = trainer_p.evaluate(inputs_p, target, idx_test)
             results[0] += [(accuracy_dev, accuracy_test)]
+
         else:
             if opt['concat'] == 1:
-                if opt['IR'] == 1: loss = trainer_p_concat.update_soft_IR(inputs_p_concat, target_p_concat, idx_all, probs_q, opt['tau'])
-                else: loss = trainer_p_concat.update_soft(inputs_p_concat, target_p_concat, idx_all)
-                _, preds, accuracy_dev = trainer_p_concat.evaluate(inputs_p_concat, target, idx_dev)
-                _, preds, accuracy_test = trainer_p_concat.evaluate(inputs_p_concat, target, idx_test)
+                if opt['IR'] == 1: loss = trainer_p_concat.update_soft_IR_w_hidden(inputs_p, hidden, target_p_concat, idx_all, probs_q)
+                else: loss = trainer_p_concat.update_soft_w_hidden(inputs_p, hidden, target_p_concat, idx_all)
+                _, preds, accuracy_dev = trainer_p_concat.evaluate_w_hidden(inputs_p, hidden, target, idx_dev)
+                _, preds, accuracy_test = trainer_p_concat.evaluate_w_hidden(inputs_p, hidden, target, idx_test)
                 results += [(accuracy_dev, accuracy_test)]
             else:
-                if opt['IR'] == 1: loss = trainer_p.update_soft_IR(inputs_p, target_p, idx_all, probs_q, opt['tau'])
+                if opt['IR'] == 1: loss = trainer_p.update_soft_IR(inputs_p, target_p, idx_all, probs_q)
                 else: loss = trainer_p.update_soft(inputs_p, target_p, idx_all)
                 _, preds, accuracy_dev = trainer_p.evaluate(inputs_p, target, idx_dev)
                 _, preds, accuracy_test = trainer_p.evaluate(inputs_p, target, idx_test)
                 results += [(accuracy_dev, accuracy_test)]
     return results
 
-def train_p_concat(epoches):
+# def train_p_concat(epoches):
     update_p_concat_data()
     results = []
     for epoch in range(epoches):
@@ -334,8 +339,8 @@ def train_q(epoches):
             results[0] += [(accuracy_dev, accuracy_test)]
             # if opt['IR'] == 1: loss = trainer_q_concat.update_soft_IR(inputs_q, target_q_concat, idx_all, probs_q_concat)
             loss = trainer_q_concat.update_soft_hidden(inputs_q, target_q_concat, idx_all)
-            _, preds, accuracy_dev = trainer_q.evaluate(inputs_q, target, idx_dev)
-            _, preds, accuracy_test = trainer_q.evaluate(inputs_q, target, idx_test)
+            _, preds, accuracy_dev = trainer_q_concat.evaluate_o_hidden(inputs_q, target, idx_dev)
+            _, preds, accuracy_test = trainer_q_concat.evaluate_o_hidden(inputs_q, target, idx_test)
             results[1] += [(accuracy_dev, accuracy_test)]
         else:
             # if opt['IR'] == 1: loss = trainer_q.update_soft_IR(inputs_q, target_q, idx_all, probs_q)
@@ -346,6 +351,9 @@ def train_q(epoches):
     return results
 
 def get_accuracy(results):
+    """
+    Return test accuracy with best dev accuracy
+    """
     best_dev, acc_test = 0.0, 0.0
     for d, t in results:
         if d > best_dev:
@@ -362,6 +370,7 @@ for k in range(opt['iter']):
             results_p = train_p(opt['epoch'])
         p_results += results_p[0]
         p_concat_results += results_p[1]
+
         # TODO: add a greedy MPE-search to maintain a best prediction
         # sampler_q = Trainer(opt, gnnq)
         # sampler_q_concat = Trainer(opt, gnnq_concat)
@@ -374,6 +383,7 @@ for k in range(opt['iter']):
             # idx_lb_concat = torch.multinomial(preds_concat, 1).squeeze(1)
             # if opt['IR'] == 1: probs_q_concat.copy_(preds_concat[(torch.arange(preds_concat.shape[0]), idx_lb_concat)])
             # inputs_p_concat.copy_(torch.cat((inputs_p, inputs_q), 1))
+
             results_q = train_q(opt['epoch'])
 
         q_results += results_q[0]

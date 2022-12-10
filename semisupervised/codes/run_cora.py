@@ -23,7 +23,7 @@ opt['tau'] = 0.1
 opt['concat'] = 1
 opt['compare'] = 1 * opt['concat']
 opt['IR'] = 0
-opt['MC_smp'] = 50
+opt['MC_smp'] = 1
 
 def generate_command(opt):
     cmd = 'python3 train.py'

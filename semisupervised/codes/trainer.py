@@ -58,7 +58,29 @@ class Trainer(object):
         self.optimizer.step()
         return loss.item()
 
-    def update_soft_IR(self, inputs, target, idx, probs, tau = 1):
+    def update_soft_IR_w_hidden(self, inputs, hidden, target, idx, probs):
+        if self.opt['cuda']:
+            inputs = inputs.cuda()
+            hidden = hidden.cuda()
+            target = target.cuda()
+            idx = idx.cuda()
+        self.model.train()
+        self.optimizer.zero_grad()
+
+        logits = self.model(inputs, hidden)
+        logits = torch.log_softmax(logits, dim=-1)
+        # loss = -torch.mean(torch.sum(target[idx] * logits[idx], dim=-1))
+        # adjust by importance ratio
+        inds = torch.where(self.model.adj.to_dense()>0, 1, 0)
+        IR = torch.prod(inds * probs, dim=-1)
+
+        loss = -torch.sum(torch.sum(target[idx] * logits[idx], dim=-1) * IR)
+        
+        loss.backward()
+        self.optimizer.step()
+        return loss.item()
+
+    def update_soft_IR(self, inputs, target, idx, probs):
         if self.opt['cuda']:
             inputs = inputs.cuda()
             target = target.cuda()
@@ -75,6 +97,24 @@ class Trainer(object):
 
         loss = -torch.sum(torch.sum(target[idx] * logits[idx], dim=-1) * IR)
         
+        loss.backward()
+        self.optimizer.step()
+        return loss.item()
+
+    def update_soft_w_hidden(self, inputs, hidden, target, idx):
+        if self.opt['cuda']:
+            inputs = inputs.cuda()
+            hidden = hidden.cuda()
+            target = target.cuda()
+            idx = idx.cuda()
+
+        self.model.train()
+        self.optimizer.zero_grad()
+
+        logits = self.model(inputs, hidden)
+        logits = torch.log_softmax(logits, dim=-1)
+        loss = -torch.mean(torch.sum(target[idx] * logits[idx], dim=-1))
+
         loss.backward()
         self.optimizer.step()
         return loss.item()
@@ -113,6 +153,23 @@ class Trainer(object):
         self.optimizer.step()
         return loss.item()
     
+    def evaluate_w_hidden(self, inputs, hidden, target, idx):
+        if self.opt['cuda']:
+            inputs = inputs.cuda()
+            hidden = hidden.cuda()
+            target = target.cuda()
+            idx = idx.cuda()
+
+        self.model.eval()
+
+        logits = self.model(inputs, hidden)
+        loss = self.criterion(logits[idx], target[idx])
+        preds = torch.max(logits[idx], dim=1)[1]
+        correct = preds.eq(target[idx]).double()
+        accuracy = correct.sum() / idx.size(0)
+
+        return loss.item(), preds, accuracy.item()
+    
     def evaluate(self, inputs, target, idx):
         if self.opt['cuda']:
             inputs = inputs.cuda()
@@ -122,6 +179,22 @@ class Trainer(object):
         self.model.eval()
 
         logits = self.model(inputs)
+        loss = self.criterion(logits[idx], target[idx])
+        preds = torch.max(logits[idx], dim=1)[1]
+        correct = preds.eq(target[idx]).double()
+        accuracy = correct.sum() / idx.size(0)
+
+        return loss.item(), preds, accuracy.item()
+
+    def evaluate_o_hidden(self, inputs, target, idx):
+        if self.opt['cuda']:
+            inputs = inputs.cuda()
+            target = target.cuda()
+            idx = idx.cuda()
+
+        self.model.eval()
+
+        logits, _ = self.model(inputs)
         loss = self.criterion(logits[idx], target[idx])
         preds = torch.max(logits[idx], dim=1)[1]
         correct = preds.eq(target[idx]).double()
@@ -141,8 +214,22 @@ class Trainer(object):
         logits = torch.softmax(logits, dim=-1).detach()
 
         return logits
+    
+    def predict_w_hidden(self, inputs, hidden, tau=1):
+        # output distribution
+        if self.opt['cuda']:
+            inputs = inputs.cuda()
+            hidden = hidden.cuda()
 
-    def predict_hidden(self, inputs, tau=1):
+        self.model.eval()
+
+        logits = self.model(inputs, hidden) / tau
+
+        logits = torch.softmax(logits, dim=-1).detach()
+
+        return logits
+
+    def predict_o_hidden(self, inputs, tau=1):
         # output distribution
         if self.opt['cuda']:
             inputs = inputs.cuda()

@@ -17,10 +17,14 @@ opt['self_link_weight'] = 1.0
 opt['pre_epoch'] = 100
 opt['epoch'] = 10   # Gradient descent iter
 <<<<<<< HEAD
+<<<<<<< HEAD
 opt['iter'] = 5    # fixed-point iter
 =======
 opt['iter'] = 15    # fixed-point iter
 >>>>>>> b1d8e26 (run experiment)
+=======
+opt['iter'] = 5    # fixed-point iter
+>>>>>>> 29cffe9 (prepare for positional-embd test)
 opt['use_gold'] = 1
 opt['draw'] = 'smp'
 opt['tau'] = 0.1

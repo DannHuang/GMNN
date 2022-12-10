@@ -17,10 +17,14 @@ opt['self_link_weight'] = 1.0
 opt['pre_epoch'] = 100
 opt['epoch'] = 10
 <<<<<<< HEAD
+<<<<<<< HEAD
 opt['iter'] = 5
 =======
 opt['iter'] = 15
 >>>>>>> b1d8e26 (run experiment)
+=======
+opt['iter'] = 5
+>>>>>>> 29cffe9 (prepare for positional-embd test)
 opt['use_gold'] = 1
 opt['draw'] = 'smp'
 opt['tau'] = 0.1
@@ -44,10 +48,14 @@ def run(opt):
     os.system(generate_command(opt_))
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 for k in range(10):
 =======
 for k in range(1):
 >>>>>>> b1d8e26 (run experiment)
+=======
+for k in range(10):
+>>>>>>> 29cffe9 (prepare for positional-embd test)
     seed = k + 1
     opt['seed'] = seed
     print(f'Experiment{k}:'+'-'*17)

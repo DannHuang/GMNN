@@ -143,8 +143,11 @@ class GNNp_singelGCN(nn.Module):
     def forward(self, x, h):
 =======
     def forward(self, x, h):
+<<<<<<< HEAD
         # h = x[:self.opt['num_class']]
 >>>>>>> 29cffe9 (prepare for positional-embd test)
+=======
+>>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
         x = F.relu(self.l1(x))
         xh = torch.cat((x, h), 1)
         xh = F.dropout(xh, self.opt['input_dropout'], training=self.training)

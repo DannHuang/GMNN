@@ -34,6 +34,7 @@ opt['compare'] = 1 * opt['concat']
 <<<<<<< HEAD
 <<<<<<< HEAD
 opt['IR'] = 0
+<<<<<<< HEAD
 opt['MC_smp'] = 50
 =======
 =======
@@ -45,6 +46,9 @@ opt['MC_smp'] = 10
 opt['IR'] = 0
 opt['MC_smp'] = 50
 >>>>>>> b1d8e26 (run experiment)
+=======
+opt['MC_smp'] = 1
+>>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
 
 def generate_command(opt):
     cmd = 'python3 train.py'

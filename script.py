@@ -8,7 +8,5 @@ from semisupervised.codes import loader
 # graph.to_symmetric(1.0)
 # adj = graph.get_sparse_adjacency(False)
 
-def test(a,b):
-    return a+1,b+1
-
-print(type(test(1,2)))
+a = torch.ones(3,7)
+print(a[:,:4])

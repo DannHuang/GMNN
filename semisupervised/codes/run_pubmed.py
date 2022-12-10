@@ -10,8 +10,8 @@ opt['dataset'] = '../data/pubmed'
 opt['hidden_dim'] = 16
 opt['input_dropout'] = 0.5
 opt['dropout'] = 0
-opt['optimizer'] = 'adam'
-opt['lr'] = 0.01
+opt['optimizer'] = 'rmsprop'
+opt['lr'] = 0.05
 opt['decay'] = 5e-4
 opt['self_link_weight'] = 1.0
 opt['pre_epoch'] = 100
@@ -38,4 +38,5 @@ def run(opt):
 for k in range(10):
     seed = k + 1
     opt['seed'] = seed
+    print(f'Experiment{k}:'+'-'*17)
     run(opt)

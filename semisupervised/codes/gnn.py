@@ -130,6 +130,7 @@ class GNNp_singelGCN(nn.Module):
         # concat
         opt_ = dict([('in', opt['num_class']+opt['hidden_dim']), ('out', opt['num_class'])])
         self.m1 = GraphConvolution(opt_, adj)
+        self.l1 = nn.Linear(opt['num_class'], opt['num_class'])
 
         if opt['cuda']:
             self.cuda()
@@ -137,8 +138,10 @@ class GNNp_singelGCN(nn.Module):
     def reset(self):
         self.m1.reset_parameters()
 
-    def forward(self, x):
-        # x = torch.cat((x, h), 1)
-        x = F.dropout(x, self.opt['input_dropout'], training=self.training)
-        x = self.m1(x)
-        return x
+    def forward(self, x, h):
+        # h = x[:self.opt['num_class']]
+        x = F.relu(self.l1(x))
+        xh = torch.cat((x, h), 1)
+        xh = F.dropout(xh, self.opt['input_dropout'], training=self.training)
+        xh = self.m1(xh)
+        return xh

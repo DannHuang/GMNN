@@ -16,7 +16,7 @@ opt['decay'] = 5e-4
 opt['self_link_weight'] = 1.0
 opt['pre_epoch'] = 100
 opt['epoch'] = 10   # Gradient descent iter
-opt['iter'] = 15    # fixed-point iter
+opt['iter'] = 5    # fixed-point iter
 opt['use_gold'] = 1
 opt['draw'] = 'smp'
 opt['tau'] = 0.1
@@ -35,7 +35,7 @@ def run(opt):
     opt_ = copy.deepcopy(opt)
     os.system(generate_command(opt_))
 
-for k in range(1):
+for k in range(10):
     seed = k + 1
     opt['seed'] = seed
     print(f'Experiment{k+1}:'+'-'*17)

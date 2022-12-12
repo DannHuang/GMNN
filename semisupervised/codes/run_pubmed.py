@@ -22,13 +22,15 @@ opt['draw'] = 'smp'
 opt['tau'] = 0.1
 opt['concat'] = 1
 opt['compare'] = 1 * opt['concat']
-opt['IR'] = 0
+opt['IR'] = 1
 opt['MC_smp'] = 50
 <<<<<<< HEAD
 
 
 =======
 >>>>>>> b1d8e26 (run experiment)
+
+
 
 def generate_command(opt):
     cmd = 'python3 train.py'

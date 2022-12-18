@@ -30,7 +30,12 @@ for d, v in b:
 >>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
 =======
 a = [(725,), (84,)]
+<<<<<<< HEAD
 b = np.arange(84)
 c = b[-8*12:]
 print(c.reshape([12,8]))
 >>>>>>> 3ede74d (pre version)
+=======
+b = np.arange(14)
+print(np.sum(b[:4]))
+>>>>>>> e6262a6 (test)

@@ -16,44 +16,14 @@ opt['decay'] = 5e-4
 opt['self_link_weight'] = 1.0
 opt['pre_epoch'] = 100
 opt['epoch'] = 10   # Gradient descent iter
-<<<<<<< HEAD
-<<<<<<< HEAD
 opt['iter'] = 5    # fixed-point iter
-=======
-opt['iter'] = 15    # fixed-point iter
->>>>>>> b1d8e26 (run experiment)
-=======
-opt['iter'] = 5    # fixed-point iter
->>>>>>> 29cffe9 (prepare for positional-embd test)
 opt['use_gold'] = 1
 opt['draw'] = 'smp'
 opt['tau'] = 0.1
 opt['concat'] = 1
 opt['compare'] = 1 * opt['concat']
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-opt['IR'] = 0
-<<<<<<< HEAD
-opt['MC_smp'] = 50
-=======
-=======
->>>>>>> 1c20b2d (logger update)
-opt['IR'] = 1
-opt['MC_smp'] = 10
->>>>>>> da42629 (IR test)
-=======
 opt['IR'] = 0
 opt['MC_smp'] = 50
->>>>>>> b1d8e26 (run experiment)
-=======
-opt['MC_smp'] = 1
->>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
-=======
-opt['IR'] = 1
-opt['MC_smp'] = 50
->>>>>>> 3ede74d (pre version)
 
 def generate_command(opt):
     cmd = 'python3 train.py'
@@ -68,13 +38,5 @@ def run(opt):
 for k in range(10):
     seed = k + 1
     opt['seed'] = seed
-<<<<<<< HEAD
-<<<<<<< HEAD
     print(f'Experiment{k+1}:'+'-'*17)
-=======
-    print(f'Experiment{k}:'+'-'*17)
->>>>>>> 263f96e (logger-update)
-=======
-    print(f'Experiment{k+1}:'+'-'*17)
->>>>>>> 1c20b2d (logger update)
     run(opt)

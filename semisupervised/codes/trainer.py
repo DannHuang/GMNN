@@ -152,26 +152,6 @@ class Trainer(object):
         loss.backward()
         self.optimizer.step()
         return loss.item()
-<<<<<<< HEAD
-    
-    def evaluate_w_hidden(self, inputs, hidden, target, idx):
-        if self.opt['cuda']:
-            inputs = inputs.cuda()
-            hidden = hidden.cuda()
-            target = target.cuda()
-            idx = idx.cuda()
-
-        self.model.eval()
-
-        logits = self.model(inputs, hidden)
-        loss = self.criterion(logits[idx], target[idx])
-        preds = torch.max(logits[idx], dim=1)[1]
-        correct = preds.eq(target[idx]).double()
-        accuracy = correct.sum() / idx.size(0)
-
-        return loss.item(), preds, accuracy.item()
-=======
->>>>>>> 75fa17c (bug fixed for hidden-concat)
     
     def evaluate_w_hidden(self, inputs, hidden, target, idx):
         if self.opt['cuda']:
@@ -234,8 +214,7 @@ class Trainer(object):
         logits = torch.softmax(logits, dim=-1).detach()
 
         return logits
-    
-<<<<<<< HEAD
+
     def predict_by_gradient_w_hidden(self, inputs, hidden, target, idx):
         psd_label = torch.zeros_like(inputs)
         psd_label.copy_(inputs)
@@ -285,22 +264,14 @@ class Trainer(object):
         
         for p in self.parameters: p.requires_grad = True
 
-        return labels         
-
+        return labels
+    
     def predict_w_hidden(self, inputs, hidden, tau=1):
         # output distribution
         if self.opt['cuda']:
             inputs = inputs.cuda()
             hidden = hidden.cuda()
 
-=======
-    def predict_w_hidden(self, inputs, hidden, tau=1):
-        # output distribution
-        if self.opt['cuda']:
-            inputs = inputs.cuda()
-            hidden = hidden.cuda()
-
->>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
         self.model.eval()
 
         logits = self.model(inputs, hidden) / tau

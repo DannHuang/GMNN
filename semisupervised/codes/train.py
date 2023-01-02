@@ -102,17 +102,8 @@ if opt['IR'] == 1:
     probs_q_concat = torch.zeros(opt['num_node'])
 # Feature concatenated to GNN-p input
 if opt['concat'] == 1:
-<<<<<<< HEAD
-<<<<<<< HEAD
     # inputs_p_concat = torch.zeros(opt['num_node'], opt['num_class'] + opt['hidden_dim'])
     hidden = torch.zeros(opt['num_node'], opt['hidden_dim'])
-=======
-    inputs_p_concat = torch.zeros(opt['num_node'], opt['num_class'] + opt['num_feature'])
->>>>>>> ab411ab (branch test)
-=======
-    # inputs_p_concat = torch.zeros(opt['num_node'], opt['num_class'] + opt['hidden_dim'])
-    hidden = torch.zeros(opt['num_node'], opt['hidden_dim'])
->>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
 if opt['compare'] == 1:
     # Maintain additional tensor for comparision
     target_q_concat = torch.zeros(opt['num_node'], opt['num_class'])
@@ -141,7 +132,7 @@ gnnq = GNNq(opt, adj)
 trainer_q = Trainer(opt, gnnq)
 # Maintain another GNN-q for comparison
 if opt['compare'] == 1:
-    gnnq_concat = GNNq(opt, adj)
+    gnnq_concat = GNNq_feature(opt, adj)
     trainer_q_concat = Trainer(opt, gnnq_concat)
 
 gnnp = GNNp(opt, adj)
@@ -161,15 +152,7 @@ def update_p_data():
     # update inputs and target (GNN-q's output) to GNN-p
     if opt['compare'] == 1:
         preds = trainer_q.predict(inputs_q, opt['tau'])
-<<<<<<< HEAD
-<<<<<<< HEAD
         preds_concat, hidden_q = trainer_q_concat.predict_o_hidden(inputs_q, opt['tau'])
-=======
-        preds_concat = trainer_q_concat.predict(inputs_q, opt['tau'])
->>>>>>> c7065d2 (bug-fixed in attibute-concat branch)
-=======
-        preds_concat, hidden_q = trainer_q_concat.predict_o_hidden(inputs_q, opt['tau'])
->>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
         if opt['draw'] == 'exp':
             inputs_p.copy_(preds)
             target_p.copy_(preds)
@@ -196,27 +179,10 @@ def update_p_data():
             inputs_p[idx_train] = temp
             target_p[idx_train] = temp
             target_p_concat[idx_train] = temp
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
             # temp = torch.zeros(idx_train.size(0), inputs_p_concat.size(1)).type_as(target_q)
             # temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
             # inputs_p_concat[idx_train] = temp
         hidden.copy_(hidden_q)
-<<<<<<< HEAD
-=======
-            temp = torch.zeros(idx_train.size(0), inputs_p_concat.size(1)).type_as(target_q)
-            temp.scatter_(1, torch.unsqueeze(target[idx_train], 1), 1.0)
-            inputs_p_concat[idx_train] = temp
-<<<<<<< HEAD
-        inputs_p_concat.copy_(torch.cat((inputs_p, hidden_q), 1))
->>>>>>> 75fa17c (bug fixed for hidden-concat)
-=======
-        inputs_p_concat.copy_(torch.cat((inputs_p, inputs_q), 1))
->>>>>>> c7065d2 (bug-fixed in attibute-concat branch)
-=======
->>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
     else:
         preds = trainer_q.predict(inputs_q, opt['tau'])
         if opt['draw'] == 'exp':
@@ -369,12 +335,7 @@ def train_p(epoches):
                 results += [(accuracy_dev, accuracy_test)]
     return results
 
-<<<<<<< HEAD
-'''
-def train_p_concat(epoches):
-=======
 # def train_p_concat(epoches):
->>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
     update_p_concat_data()
     results = []
     for epoch in range(epoches):
@@ -383,10 +344,9 @@ def train_p_concat(epoches):
         _, preds, accuracy_test = trainer_p_concat.evaluate(inputs_p_concat, target, idx_test)
         results += [(accuracy_dev, accuracy_test)]
     return results
-'''
 
 def train_q(epoches):
-    update_q_data()
+    update_q_data_by_gradient()
     results = [[], []] if opt['compare'] == 1 else []
     for epoch in range(epoches):
         if opt['compare']:
@@ -396,23 +356,9 @@ def train_q(epoches):
             _, preds, accuracy_test = trainer_q.evaluate(inputs_q, target, idx_test)
             results[0] += [(accuracy_dev, accuracy_test)]
             # if opt['IR'] == 1: loss = trainer_q_concat.update_soft_IR(inputs_q, target_q_concat, idx_all, probs_q_concat)
-<<<<<<< HEAD
             loss = trainer_q_concat.update_soft_hidden(inputs_q, target_q_concat, idx_all)
-<<<<<<< HEAD
-<<<<<<< HEAD
             _, preds, accuracy_dev = trainer_q_concat.evaluate_o_hidden(inputs_q, target, idx_dev)
             _, preds, accuracy_test = trainer_q_concat.evaluate_o_hidden(inputs_q, target, idx_test)
-=======
-=======
-            loss = trainer_q_concat.update_soft(inputs_q, target_q_concat, idx_all)
->>>>>>> c7065d2 (bug-fixed in attibute-concat branch)
-            _, preds, accuracy_dev = trainer_q.evaluate(inputs_q, target, idx_dev)
-            _, preds, accuracy_test = trainer_q.evaluate(inputs_q, target, idx_test)
->>>>>>> 75fa17c (bug fixed for hidden-concat)
-=======
-            _, preds, accuracy_dev = trainer_q_concat.evaluate_o_hidden(inputs_q, target, idx_dev)
-            _, preds, accuracy_test = trainer_q_concat.evaluate_o_hidden(inputs_q, target, idx_test)
->>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
             results[1] += [(accuracy_dev, accuracy_test)]
         else:
             # if opt['IR'] == 1: loss = trainer_q.update_soft_IR(inputs_q, target_q, idx_all, probs_q)
@@ -436,15 +382,7 @@ base_results, q_results, p_results, p_concat_results, q_concat_results = [], [],
 base_results += pre_train(opt['pre_epoch'])
 print(f'Pre-train accuracy: q={get_accuracy(base_results)*100:.1f}%')
 for k in range(opt['iter']):
-<<<<<<< HEAD
-<<<<<<< HEAD
     print(f'\tFixed-point Iteration {k+1}:')
-=======
-    print(f'\tFixed-point Iteration {k}:')
->>>>>>> 4032dda (bug fixed)
-=======
-    print(f'\tFixed-point Iteration {k+1}:')
->>>>>>> 1c20b2d (logger update)
     if opt['compare'] == 1:
         for it in range(opt['MC_smp']):
             results_p = train_p(opt['epoch'])

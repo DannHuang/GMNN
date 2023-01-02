@@ -128,7 +128,7 @@ class GNNp_singelGCN(nn.Module):
         self.adj = adj
 
         # concat
-        opt_ = dict([('in', opt['num_class']+opt['num_feature']), ('out', opt['num_class'])])
+        opt_ = dict([('in', opt['num_class']+opt['hidden_dim']), ('out', opt['num_class'])])
         self.m1 = GraphConvolution(opt_, adj)
         self.l1 = nn.Linear(opt['num_class'], opt['num_class'])
 
@@ -138,29 +138,9 @@ class GNNp_singelGCN(nn.Module):
     def reset(self):
         self.m1.reset_parameters()
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     def forward(self, x, h):
-=======
-    def forward(self, x, h):
-<<<<<<< HEAD
-        # h = x[:self.opt['num_class']]
->>>>>>> 29cffe9 (prepare for positional-embd test)
-=======
->>>>>>> 65f358c (hidden-state concat + learnable label-encoding)
         x = F.relu(self.l1(x))
         xh = torch.cat((x, h), 1)
         xh = F.dropout(xh, self.opt['input_dropout'], training=self.training)
         xh = self.m1(xh)
-<<<<<<< HEAD
         return xh
-=======
-    def forward(self, x):
-        # x = torch.cat((x, h), 1)
-        x = F.dropout(x, self.opt['input_dropout'], training=self.training)
-        x = self.m1(x)
-        return x
->>>>>>> 75fa17c (bug fixed for hidden-concat)
-=======
-        return xh
->>>>>>> 29cffe9 (prepare for positional-embd test)

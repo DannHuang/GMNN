@@ -128,7 +128,7 @@ class GNNp_singelGCN(nn.Module):
         self.adj = adj
 
         # concat
-        opt_ = dict([('in', opt['num_class']+opt['hidden_dim']), ('out', opt['num_class'])])
+        opt_ = dict([('in', opt['num_class']+opt['num_feature']), ('out', opt['num_class'])])
         self.m1 = GraphConvolution(opt_, adj)
         self.l1 = nn.Linear(opt['num_class'], opt['num_class'])
 

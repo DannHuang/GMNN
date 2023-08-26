@@ -132,7 +132,7 @@ gnnq = GNNq(opt, adj)
 trainer_q = Trainer(opt, gnnq)
 # Maintain another GNN-q for comparison
 if opt['compare'] == 1:
-    gnnq_concat = GNNq_feature(opt, adj)
+    gnnq_concat = GNNq(opt, adj)
     trainer_q_concat = Trainer(opt, gnnq_concat)
 
 gnnp = GNNp(opt, adj)
